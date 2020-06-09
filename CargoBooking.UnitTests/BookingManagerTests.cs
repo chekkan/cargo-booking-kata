@@ -34,5 +34,16 @@ namespace CargoBooking.UnitTests
             Assert.True(actual.HasError);
             Assert.IsType<VesselAtCapacity>(actual.Error);
         }
+
+        [Fact]
+        public void CanBookVesselThatFitsAfterOneThatDoesnt()
+        {
+            string confirmationNumber = Guid.NewGuid().ToString();
+            confNumGenMock.Setup(gen => gen.Generate()).Returns(confirmationNumber);
+            var vessel = new Vessel(5);
+            sut.Book(vessel, new Cargo(6));
+            var actual = sut.Book(vessel, new Cargo(5));
+            Assert.Equal(confirmationNumber, actual.Value);
+        }
     }
 }

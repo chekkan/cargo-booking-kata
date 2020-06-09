@@ -1,24 +1,21 @@
 ﻿#nullable enable
 
+using System;
+using System.Collections.Generic;
+
 namespace CargoBooking
 {
     public class Vessel
     {
+        public int Capacity { get; }
+
         public Vessel(int capacity)
         {
-            this.Capacity = capacity;
-        }
-
-        public int Capacity { get; private set; }
-
-        public VesselAtCapacity? Assign(Cargo cargo)
-        {
-            if (Capacity - cargo.Size < 0)
+            if (capacity < 0)
             {
-                return new VesselAtCapacity();
+                throw new ArgumentOutOfRangeException(nameof(capacity));
             }
-            Capacity -= cargo.Size;
-            return null;
+            Capacity = capacity;
         }
     }
 }

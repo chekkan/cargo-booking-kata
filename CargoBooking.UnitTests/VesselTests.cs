@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System;
+using Xunit;
 
 namespace CargoBooking.UnitTests
 {
@@ -7,24 +8,19 @@ namespace CargoBooking.UnitTests
         [Theory]
         [InlineData(10)]
         [InlineData(200)]
-        public void VesselCapacityDecreasesWhenCargoIsAssigned(int origCapacity)
+        public void VesselCapacity(int origCapacity)
         {
             var sut = new Vessel(origCapacity);
-            Cargo cargo = new Cargo(2);
-            var result = sut.Assign(cargo);
-            Assert.Equal(origCapacity - cargo.Size, sut.Capacity);
-            Assert.Null(result);
+            Assert.Equal(origCapacity, sut.Capacity);
         }
 
-        [Fact]
-        public void VesselAtCapacity()
+        [Theory]
+        [InlineData(-10)]
+        [InlineData(-1)]
+        public void NegativeCapacityThrows(int capacity)
         {
-            var sut = new Vessel(10);
-            var result = sut.Assign(new Cargo(6));
-            Assert.Null(result);
-            result = sut.Assign(new Cargo(5));
-            Assert.IsType<VesselAtCapacity>(result);
-            Assert.Equal(4, sut.Capacity);
+            var errors = Assert.Throws<ArgumentOutOfRangeException>(() => new Vessel(capacity));
+            Assert.Equal("capacity", errors.ParamName);
         }
     }
 }
