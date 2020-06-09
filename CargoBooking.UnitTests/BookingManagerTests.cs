@@ -13,7 +13,8 @@ namespace CargoBooking.UnitTests
         {
             confNumGenMock = new Mock<IBookingConfirmationGenerator>();
             confNumGenMock.Setup(gen => gen.Generate()).Returns(Guid.NewGuid().ToString());
-            sut = new BookingManager(confNumGenMock.Object);
+            var bookingPolicy = new NormalBookingPolicy();
+            sut = new BookingManager(confNumGenMock.Object, bookingPolicy);
         }
 
         [Fact]
@@ -44,6 +45,30 @@ namespace CargoBooking.UnitTests
             sut.Book(vessel, new Cargo(6));
             var actual = sut.Book(vessel, new Cargo(5));
             Assert.Equal(confirmationNumber, actual.Value);
+        }
+
+        [Fact]
+        public void OverbookingPolicyAccepts()
+        {
+            string confirmationNumber = Guid.NewGuid().ToString();
+            confNumGenMock.Setup(gen => gen.Generate()).Returns(confirmationNumber);
+            var bookingPolicy = new OverbookingPolicy();
+            sut = new BookingManager(confNumGenMock.Object, bookingPolicy);
+            var vessel = new Vessel(10);
+            var actual = sut.Book(vessel, new Cargo(11));
+            Assert.Equal(confirmationNumber, actual.Value);
+        }
+
+        [Fact]
+        public void OverbookingPolicyRejects()
+        {
+            string confirmationNumber = Guid.NewGuid().ToString();
+            confNumGenMock.Setup(gen => gen.Generate()).Returns(confirmationNumber);
+            var bookingPolicy = new OverbookingPolicy();
+            sut = new BookingManager(confNumGenMock.Object, bookingPolicy);
+            var vessel = new Vessel(10);
+            var actual = sut.Book(vessel, new Cargo(12));
+            Assert.IsType<VesselAtCapacity>(actual.Error);
         }
     }
 }
